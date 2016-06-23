@@ -21,6 +21,8 @@ namespace InvisibleForm
         public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
         [DllImport("user32.dll")]
         public static extern bool PrintWindow(IntPtr hWnd, IntPtr hdcBlt, int nFlags);
+        [DllImport("user32.dll", EntryPoint = "FindWindow", SetLastError = true)]
+        public static extern IntPtr FindWindowByCaption(IntPtr zeroOnly, string lpWindowName);
 
         public Form1()
         {
@@ -41,8 +43,8 @@ namespace InvisibleForm
         private void HandleTimer()
         {
             Stopwatch _watch = Stopwatch.StartNew();
-            var bmp = TakeScreen("Skype");
-            //this.BackgroundImage = bmp;
+            var bmp = TakeScreen("WindowsForms10.Window.20008.app.0.3e799b_r13_ad1");
+            this.BackgroundImage = bmp;
 
             _watch.Stop();
             Debug.WriteLine(_watch.Elapsed.TotalMilliseconds);
@@ -53,25 +55,19 @@ namespace InvisibleForm
             var proc = Process.GetProcessesByName(procName);
             Bitmap bmp = null;
             RECT rc;
+            var hwnd = FindWindowByCaption(IntPtr.Zero, "Bluestacks App Player");
+            GetWindowRect(hwnd, out rc);
+            this.Size = rc.Size;
+            this.Location = rc.Location;
 
-            foreach (var p in proc) {
-                var hwnd = p.MainWindowHandle;
-                GetWindowRect(hwnd, out rc);
+            bmp = new Bitmap(rc.Width, rc.Height, PixelFormat.Format32bppArgb);
+            Graphics gfxBmp = Graphics.FromImage(bmp);
+            IntPtr hdcBitmap = gfxBmp.GetHdc();
 
-                if (rc.Height == 0 || rc.Width == 0) continue;
+            PrintWindow(hwnd, hdcBitmap, 0);
 
-                this.Size = rc.Size;
-                this.Location = rc.Location;
-                
-                bmp = new Bitmap(rc.Width, rc.Height, PixelFormat.Format32bppArgb);
-                Graphics gfxBmp = Graphics.FromImage(bmp);
-                IntPtr hdcBitmap = gfxBmp.GetHdc();
-
-                PrintWindow(hwnd, hdcBitmap, 0);
-
-                gfxBmp.ReleaseHdc(hdcBitmap);
-                gfxBmp.Dispose();
-            }
+            gfxBmp.ReleaseHdc(hdcBitmap);
+            gfxBmp.Dispose();
             return bmp;
 
         }
