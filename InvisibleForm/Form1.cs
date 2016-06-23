@@ -35,9 +35,9 @@ namespace InvisibleForm
             this.BackColor = Color.LimeGreen;
             this.TransparencyKey = Color.LimeGreen;
 
-            //var timer = new System.Timers.Timer(50);
-            //timer.Elapsed += (s, e) => this.HandleTimer();
-            //timer.Start();
+            var timer = new System.Timers.Timer(50);
+            timer.Elapsed += (s, e) => this.HandleTimer();
+            timer.Start();
         }
 
         private void HandleTimer()
@@ -52,13 +52,10 @@ namespace InvisibleForm
 
         private Bitmap TakeScreen(string procName)
         {
-            var proc = Process.GetProcessesByName(procName);
             Bitmap bmp = null;
             RECT rc;
             var hwnd = FindWindowByCaption(IntPtr.Zero, "Bluestacks App Player");
             GetWindowRect(hwnd, out rc);
-            this.Size = rc.Size;
-            this.Location = rc.Location;
 
             bmp = new Bitmap(rc.Width, rc.Height, PixelFormat.Format32bppArgb);
             Graphics gfxBmp = Graphics.FromImage(bmp);
@@ -74,11 +71,11 @@ namespace InvisibleForm
 
         private void button1_Click(object sender, EventArgs e)
         {
-            this.HandleTimer();
-
-            System.Drawing.Graphics graphics = this.CreateGraphics();
-            System.Drawing.Rectangle rectangle = new System.Drawing.Rectangle(1, 1, this.Width-1, this.Height-1);
-            graphics.DrawRectangle(System.Drawing.Pens.Red, rectangle);
+            RECT rc;
+            var hwnd = FindWindowByCaption(IntPtr.Zero, "Bluestacks App Player");
+            GetWindowRect(hwnd, out rc);
+            this.Size = rc.Size;
+            this.Location = rc.Location;
         }
     }
 }
